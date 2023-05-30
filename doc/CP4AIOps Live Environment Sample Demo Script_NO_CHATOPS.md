@@ -1,752 +1,649 @@
-
-
 <center> <h1>Cloud Pak for Watson AIOps </h1> </center>
 <center> <h2>Sample Demo Script for the live demo environment</h2> </center>
-
-
-
 
 ![K8s CNI](./demo/00_aimanager_insights.png)
 
 <center> ©2023 Włodzimierz Dymaczewski/Niklaus Hirt / IBM </center>
 
-
-
-
 # 1. Introduction
 
-This script is intended as a guide to demonstrate Cloud Pak for Watson AIOps using the live demo environment, running the Cloud Pak itself and the demo application. The script is presented in a few sections. You can utilize some or all sections depending upon your client’s needs. 
+このスクリプトは、Cloud Pak for Watson AIOps本体とデモアプリケーションをライブデモ環境で動かしてデモするためのガイドとして作成されています。
+このスクリプトは、いくつかのセクションで説明されています。
+お客様のニーズに応じて、一部またはすべてのセクションを使用できます。
 
-The script is intended to be used with live Cloud Pak for Watson AIOps 3.x demo environment that you can reserve via [TechZone](https://techzone.ibm.com/collection/cp4waiopsdemo#tab-1) or [install yourself](https://github.com/niklaushirt/cp4waiops-deployer#-1-quick-install).
+このスクリプトは、[TechZone](https://techzone.ibm.com/collection/cp4waiopsdemo#tab-1)経由で予約するか、[自分でインストール](https://github.com/niklaushirt/cp4waiops-deployer#-1-quick-install)できるCloud Pak for Watson AIOps 3.xのライブデモ環境で使用することを意図しています。
 
-
-In the demo script, 
-
-- “**🚀 <u>Action</u>**” denotes a setup step for the presenter.
-- “**📣 <u>Narration</u>**” denotes what the presenter will say. 
-- “**ℹ️ <u>Note</u>**” denotes where the presenter may need to deviate from this demo script or add supplemental comments.
-
-<div style="page-break-after: always;"></div>
-
-## 1.1 Key Terminology
-You should be familiar with the following terminology when discussing Cloud Pak for Watson AIOps:
-
-- **Application**: IBM Cloud Pak for Watson AIOps brings together the capability to group resources from different data types into applications. Clients can flexibly define an application to meet their business needs. With applications, you can obtain an integrated view of resources to understand inter-dependencies.
-- **Event**: A point-in-time statement in Cloud Pak for Watson AIOps that tells us that something happened somewhere in a client’s environment. It tells us what happened, where it happened, and when it happened.  An event does not have to be exceptional or actionable, it can simply tell us something has happened.  
-- **Alert**: An alert in Cloud Pak for Watson AIOps represents an abnormal condition somewhere in an environment that requires resolution. It tells us what is happening, where it is happening, and when it started to happen.  It may be informed by one or more events. It has a start time and end time. 
-- **Story**: A story in Cloud Pak for Watson AIOps represents an outage or reduction in service which is currently impacting customers and requires rapid remediation.  It is created based on one or more trigger alerts that indicate the outage or reduction in service.  Any alert of severity Major or Critical will act as a trigger alert. Other alerts that share the same cause may add context to the story. 
-- **Incident**: An incident in ServiceNow is an event of interruption disruption or degradation in normal service operation. An open incident in ServiceNow implies that the customer is impacted, or it represents the business risk.
-- **Topology**: A topology is a representation of how constituent parts are interrelated. In Cloud Pak for Watson AIOps, an algorithm analyzes how the event nodes are proximate to each other and groups them into a topology-based correlation.
+デモ・スクリプトでは、
+- “**🚀 <u>Action</u>**” は、プレゼンターの設定ステップを示します。
+- “**📣 <u>Narration</u>**” は、プレゼンターが話す内容を意味します。 
+- “**ℹ️ <u>Note</u>**” は、プレゼンターがこのデモスクリプトから逸脱したり、補足コメントを追加したりする必要がある箇所を示します。
 
 <div style="page-break-after: always;"></div>
 
-## 1.2 Navigating The Demo UI
+## 1.1 主な用語
 
+Cloud Pak for Watson AIOps について説明する際には、以下の用語に精通している必要があります。
 
+- **アプリケーション**
+   - さまざまなデータ・タイプのリソースをアプリケーションにグループ化する機能を提供します。
+   - お客様は、ビジネス・ニーズに合わせてアプリケーションを柔軟に定義できます。
+   - アプリケーションを使用すると、リソースの統合ビューを取得し、相互依存関係を理解することができます。
+- **Event**
+   - 現時点で、お客様の環境のどこかで何かが起こったことを伝えるものです。
+   - 何が起こったのか、どこで起こったのか、いつ起こったのかを教えてくれます。
+   - イベントは例外的なものであったり、対処可能なものであったりする必要はなく、単に何かが起こったことを伝えるものです。
+- **アラート**
+   - アラートは、解決が必要な環境のどこかでの異常状態を表します。
+   - 何が起きているのか、どこで起きているのか、いつから起きているのかを教えてくれます。
+   - 1つまたは複数のイベントによって通知されることがあります。
+   - 開始時刻と終了時刻が含まれます。 
+- **ストーリー**
+   - ストーリーは、現在お客様に影響を及ぼしており、迅速な修復が必要なサービスが停止しているまたは機能が低下していることを表しています。
+   - サービスの停止または機能の低下を示す 1 つ以上のトリガー・アラートに基づいて作成されます。
+   - 重大度が「重要(Major)」または「重大(Critical)」のアラートは、トリガー・アラートとして機能します。
+   - 同じ原因を共有する他のアラートは、ストーリーにコンテキストを追加することができます。
+- **インシデント**
+   - ServiceNow 内のインシデントは、正常なサービス運用の中断または機能低下が発生した場合に発生します。
+   - ServiceNow のオープン・インシデントは、顧客に影響があるか、ビジネス・リスクを表していることを意味します。
+- **トポロジー**
+   - トポロジーは、構成要素がどのように相互に関連しているかを表現したものです。
+   - Cloud Pak for Watson AIOps ではアルゴリズムが、イベントノードが互いにどのように近接しているかを分析し、トポロジーベースの相関関係にグループ化します。
+
+<div style="page-break-after: always;"></div>
+
+## 1.2 デモUIの操作
 
 ![image](./demo/image.054.png)
 
-The most important functionalities are:
+重要な機能は以下となります。
 
-1. **Open CP4WAIOps (login with the provided credentials)**
-2. **Clear all existing Stories and Alerts**
-3. **Create an Incident/Story**
+1. **CP4WAIOpsへのアクセス (提供されている認証情報を使ってログイン)**
+2. **既存のストーリーとアラートを全てクリアする**
+3. **インシデント/ストーリーを作成する**
 
+> ℹ️ デモUIへのログインを求められた場合は、トークン/パスワードを使用してください。`P4ssw0rd!`
 
-> ℹ️ If you are asked to login to the Demo UI, please use the toekn/password `P4ssw0rd!`
-
-
-
-> ⚠️ Before start, you should open the CP4WAIOps and check that there are no open stories and alerts pending. If there are some created few hours before (leftovers from somebody else not completing the demo) you can clean them up using CP4WAIOps Demo UI as shown below.
+> ⚠️ デモを開始する前に、CP4WAIOpsを開き、保留中のストーリーやアラートがないことを確認する必要があります。もし、数時間前に作成されたもの（誰かがデモを完了しなかった残り）がある場合は、上記2の手順でデモUIを使用してクリーンアップすることができます。
 
 <div style="page-break-after: always;"></div>
 
-## 1.2 Demonstration scenario
+## 1.3 デモシナリオ
 
-### 1.2.1 Overview
+### 1.3.1 概要
 
-This use case shows clients how IBM Cloud Pak for Watson AIOps proactively helps avoid application downtimes and incidents impacting end-users. You play the role of an SRE/Operations person who has received a Slack message indicating that the RobotShop application is not displaying customer ratings. This is an important feature of the RobotShop application since RobotShop is the main platform from which the fictional company sells its robots.
+このユース・ケースでは、IBM Cloud Pak for Watson AIOps がエンド・ユーザーに影響を与えるアプリケーションのダウンタイムやインシデントの回避を積極的に支援する様子をお客様にお見せします。</br>
+あなたはSRE/運用担当者として、RobotShopアプリケーションに顧客の評価が表示されないことを示すSlackメッセージを受け取った役を演じています。</br>
+RobotShop は、架空の会社がロボットを販売する主要なプラットフォームで、顧客の評価が表示される機能は RobotShop アプリケーションにとって重要な機能です。
 
+### 1.3.2 Use Case
 
-### 1.2.2 Use Case
+このユース・ケースでは、Cloud Pak for Watson AIOps が SRE/Operations チームが問題を特定し、検証し、最終的に修正する際にどのように支援できるかを説明します。</br>
+このデモンストレーションでは、Instana、Turbonomic、ServiceNow、および Slack との連携が紹介されます。</br>
+Slack は、このインシデントの処理に使用される ChatOps 環境です。
 
-The use case demonstrates how Cloud Pak for Watson AIOps can assist the SRE/Operations team as they identify, verify, and ultimately correct the issue. The demonstration shows integration with Instana, Turbonomic, ServiceNow, and Slack. Slack is the ChatOps environment used for working on this incident. 
+Cloud Pak for Watson AIOps の主な販売ポイントを以下に示します。
 
-You will demonstrate the following major selling points around Cloud Pak for Watson AIOps:
-
-1. **Pulls data from various IT platforms**: IBM Cloud Pak for Watson AIOps monitors incoming data feeds including logs, metrics, alerts, topologies, and tickets, highlighting potential problems across incoming data, based on trained machine learning models.
-1. **Utilizes AI and natural language processing**: An insight layer connects the dots between structured and unstructured data, using AI and natural language processing technologies. This allows you to quickly understand the nature of the incident.
-1. **Provides trust and transparency**: Using accurate and trustworthy recommendations, you can move forward with the diagnosis of IT system problems and the identification and prioritization of the best resolution path.
-1. **Resolves rapidly**: Time and money are saved from out-of-the-box productivity that enables automation and utilizes pre-trained models. A “similar issue feature” from past incidents allows you to get services back online for customers and end-users.
+1. **さまざまな IT プラットフォームからデータを引き出します。**
+   - IBM Cloud Pak for Watson AIOps は、ログ、メトリック、アラート、トポロジー、チケットなどの受信データフィールドを監視し、ト学習済みの機械学習モデルに基づいて、受信データ全体の潜在的な問題を強調表示します。
+1. **AI と自然言語処理を活用します。**
+   - インサイトレイヤーは、AI や自然言語処理技術を活用して、構造化データと非構造化データの点と点をつなぎます。
+   - これにより、インシデントの本質を素早く理解することができます。
+1. **信頼性と透明性を提供します。**
+   - 正確で信頼性の高いレコメンデーションを使って、IT システムの問題の診断と、最適な解決策の特定と優先順位付けを進めることができます。
+1. **迅速に解決します。**
+   - 自動化を可能にし、事前に訓練されたモデルを活用することで、すぐに使える生産性から時間とコストを節約できます。
+   - 過去のインシデントからの「類似問題機能」によって、お客様やエンドユーザーのためにサービスをオンラインに戻すことができます。
 
 <div style="page-break-after: always;"></div>
 
-## 1.3 Demonstration flow
-1. Scenario introduction
-1. Trigger problem situation [In the background] 
-1. Verify the status of the Robot Shop application.
-1. Understanding and resolving the incident
-   1. Login to CP4WAIOps
-   1. Open the Story
-   1. Examining the Story
-   1. Acknowledge the Story
-   1. Similar Incidents
-   1. Examine the Alerts
-   1. Understand the Incident
-   1. Examining the Topology
-   1. [Optional] Topology in-depth
-   1. Fixing the problem with runbook automation
-   1. Resolve the Incident
-1. Summary
+## 1.4 デモの流れ
+1. シナリオの紹介
+1. トリガーとなる障害の状況説明
+1. RobotShopアプリの状況確認
+1. インシデントの理解と解決
+   1. CP4WAIOpsにログイン
+   1. ストーリーを開く
+   1. ストーリーを調べる
+   1. ストーリーを確認する
+   1. 類似のインシデント
+   1. アラートを確認する
+   1. インシデントを理解する
+   1. トポロジーを確認する
+   1. [オプション] トポロジーの詳細
+   1. runbook automationで問題を解決する
+   1. インシデントを解決する
+1. まとめ
 
+# 2. デモの実施
 
+## 2.1 デモの背景の説明
 
-# 2. Deliver the demo
+**📣 <u>ナレーション</u>** 
 
-## 2.1 Introduce the demo context
+Cloud Pak for Watson AIOpsのデモへようこそ。
+このデモでは、Watson AIOps がミッションクリティカルなワークロードのインシデントをプロアクティブに特定、診断、解決するために、運用チームをどのように支援するかを紹介します。
 
-**📣 <u>Narration</u>** 
+以下の手順を確認できます。
+- Watson AIOps は、ログ、メトリック、イベント、チケット、トポロジーなどのさまざまな情報をインテリジェントに相関させます。
+- これらの情報はすべて要約され、大量の関連性のないアラートではなく、実用的なアラートとして表示されます。
+- Watson AIOps の自動化機能により、通知を受けてから数秒から数分以内に問題を解決できます。
 
-Welcome to this demonstration of the Cloud Pak for Watson AIOps platform. In this demo, I am going to show you how Watson AIOps can help your operations team proactively identify, diagnose, and resolve incidents across mission-critical workloads.
+デモでは、RobotShop というあらゆるタイプのアプリケーションのプロキシーとして機能するサンプルアプリを使用します。
+アプリケーションはマイクロサービスアーキテクチャーで構築されており、サービスは Kubernetes のクラスター上で実行されます。
 
-You’ll see how:
+>**🚀 <u>アクション</u>**</br>
+>[デモ用のパワーポイント](https://github.com/niklaushirt/cp4waiops-deployer/blob/main/doc/CP4AIOPS_DEMO_2023_V1.pptx?raw=true)を使って紹介します。
 
-- Watson AIOps intelligently correlates multiple disparate sources of information such as logs, metrics, events, tickets and topology
-- All of this information is condensed and presented in actionable alerts instead of large quantities of unrelated alerts
-- You can resolve a problem within seconds to minutes of being notified using Watson AIOps’ automation capabilities
+**📣 <u>ナレーション</u>**
 
-During the demonstration, we will be using the sample application called RobotShop, which serves as a proxy for any type of app. The application is built on a microservices architecture, and the services are running on Kubernetes cluster.
+**Slide 2**</br>
+それではデモ環境を見てみましょう。</br>
+サンプルアプリ「RobotShop」は、Kubernetes クラスターでマイクロサービスのセットとして動作しています。</br>
+通常、このようなアプリケーションを保守する運用チームには、さまざまなデータの種類を収集するためのツール群を備えています。
 
->**🚀 <u>Action</u>**
->Use demo [introductory PowerPoint presentation](https://github.com/niklaushirt/cp4waiops-deployer/blob/main/doc/CP4AIOPS_DEMO_2023_V1.pptx?raw=true), to illustrate the narration. Adapt your details on Slide 1 and 13
-
-**📣 <u>Narration</u>**
-
-**Slide 2**: Let’ look at the environment that we have set up. Our sample application: “RobotShop” is running as a set of microservices in a Kubernetes cluster. Typically, the Operations team maintaining such application has a collection of tools through which they collect various data types. 
-
-**Slide 3**: Here we have several systems that are sending Events into WAIOPS (slide 3), like:
-
+**Slide 3**</br>
+ここでは、WAIOPS（スライド3）にイベントを送信しているいくつかのシステムがあります。
 - GitHub
 - Turbonomic
 - Instana
 - Selenium
 - Falcon (Sysdig)
 
-Those Events are being grouped into Alerts to massively reduce the number of signals that have to be treated. We usually observe a ratio of about 98-99% of reduction. This means that out of 20'000 events we get about 200-300 Alerts that can be further prioritised.
+これらのイベントはアラートとしてグループ化され、処理しなければならない信号の数を大幅に削減することができます。</br>
+通常、約98～99％の削減率が確認されています。</br>
+つまり、20,000件のイベントのうち、さらに優先順位をつけることができる約200～300件のアラートを得ることができるのです。
 
-**Slide 4**: WAIOPS also ingests Logs from ElasticSearch (this could be Splunk or other Log Aggregators). The Log Anomaly detection is trained on a well running system and is able to detect anomalies and outliers. If an Anomaly is detected it will be grouped with the other Events.
+**Slide 4**</br>
+WAIOpsはElasticSearchからもLogを取り込みます（これはSplunkや他のLog Aggregatorでも可能です）。</br>
+ログの異常検知は、十分に稼働しているシステムでトレーニングされ、異常や異常値を検知することができるようになっています。</br>
+異常が検出された場合、他のイベントと一緒にグループ化されます。
 
-**Slide 5**: WAIOPS also ingests Metrics from Instana (this could be Dynatrace, NewRelic or others). The Metric Anomaly detection is trained on a well running system and creates dynamic baselines. Through different algorithms it is able to detect anomalies and outliers. If an Anomaly is detected it will also be grouped with the other Events.
+**Slide 5**</br>
+WAIOpsはInstana（Dynatrace、NewRelicなど）からMetricを取り込みます。</br>
+Metric Anomaly detectionは、十分に稼働しているシステムでトレーニングされ、ダイナミックベースラインを作成します。</br>
+さまざまなアルゴリズムにより、異常や異常値を検出することができます。異常が検出された場合、他のイベントと一緒にグループ化されます。
 
-**Slide 6**: Alerts that are relevant for the same Incident are packaged into a so called Story. The Story will be enriched and updated with information as it gets available.
+ここまでは確認しながら済み
 
- **Slide 7**: One example is the Topology information. Not only will WAIOPS tell me that I have a problem and present all relevant Events but it will also tell me where in the system topology the problem is situated. 
+**Slide 6**</br>
+同じインシデントに関連するアラートは、いわゆる「ストーリー」にパッケージ化されます。ストーリーは、情報が入手可能になるにつれて充実し、更新されます。
 
-**Slide 8**: Furthermore the Story is enriched with past resolution information coming from ServiceNow tickets. I'll explain this more in detail during the demo.
+ **Slide 7**</br>
+その一例が、トポロジー情報です。WAIOPSは、私に問題があることを伝え、関連するすべてのイベントを提示するだけでなく、問題がシステムのトポロジーのどこに位置しているかを教えてくれます。
 
-**Slide 9**: The Stories can either be examined in the WAIOPS web interface or can be pushed to Slack or Teams if your teams are using a ChatOps approach.
+**Slide 8**</br>
+さらに、ServiceNowのチケットから得られる過去の解決情報によって、ストーリーはより豊かなものになります。詳しくはデモの中で説明します。
 
-**Slide 10**: If Operations or SREs have created Runbooks, WAIOPS can automatically trigger a Runbook to mitigate the problem.
+**Slide 9**</br>
+ストーリーは、WAIOPSのWebインターフェースで確認することもできますし、ChatOpsのアプローチを採用しているチームであれば、SlackやTeamsにプッシュすることも可能です。
 
+**Slide 10**</br>
+オペレーションやSREがRunbookを作成した場合、WAIOPSは自動的にRunbookを起動し、問題を軽減することができます。
 
+**ℹ️ <u>メモ</u>**: このデモでは、Slackは使用していません。
 
-**ℹ️ <u>Note</u>**: We are NOT using Slack in this demo.
+**📣 <u>ナレーション</u>**
 
-
-
-**📣 <u>Narration</u>**
-
-Now let's start the demo.
+それでは、デモを開始します。
 
 <div style="page-break-after: always;"></div>
 
-## 2.2 Trigger the incident
+## 2.2 インシデントのトリガー
 
-**❗ <u>Note</u>**: The following step does not have to be shown to the client – you may perform the action in the background if possible.
+**❗ <u>メモ</u>**: 次のステップはクライアントに見せる必要はありません。可能であればバックグラウンドでアクションを実行しても構いません。
 
 ![image](./demo/image.054.png)
 
-
-
->**🚀 <u>Action</u>**
->Open CP4WAIOps **Demo** UI, and trigger the incident
->
->- Point your browser to the CP4WAIOps Demo UI, 
->
->- Login with the token “P4ssw0rd!” and 
->
->- Trigger the incident `(3)` you would like to use in your demo. 
->
->  
->
->  This action injects the stream of simulated events into the system, which replicates what could happen in a real life situation.
-
-
-
+>**🚀 <u>アクション</u>**</br>
+>CP4WAIOps Demo UIを開き、インシデントを発生させます。
+>- Watson AIOpsのホーム画面の[Get started with the DemoUI]からDemo UI にアクセス 
+>- トークン `P4ssw0rd!` でログイン
+>- デモで使用したいインシデント `(3)` をトリガーしてください。
+> このアクションにより、シミュレートされたイベントのストリームがシステムに注入され、実際に発生する可能性があるエラーが再現されます。
 
 <div style="page-break-after: always;"></div>
 
-## 2.3 Verify the status of the Robot Shop application
+## 2.3 RobotShopアプリの状況確認
 
-### 2.3.1 Show the Application
-
-
+### 2.3.1 アプリケーションを表示する
 
 ![image](./demo/image.089.png)
 
+>**🚀 <u>アクション</u>**</br>
+>RobotShopアプリケーションを起動します。
+>**Demo UI** の **Third-Party** にリンクがあります。アプリケーションのUIで遊んでみてください。
 
-
->**🚀 <u>Action</u>**
->Open the RobotShop application
->
->The Link can be found in the **Demo UI** under **Third-Party**. Play with the application UI.
-
-**📣 <u>Narration</u>**
-
-In this demo I am the application SRE (Site Reliability Engineer) responsible for an e-commerce website called RobotShop, an online store operated by my company. In the middle of the day (when clients make most of the purchases) I received a slack message on my mobile, alerting me that there is some problem with the site.
-
-Let’s verify what’s going on with the RobotShop site. The application is up but displays an error that it cannot get any ratings.
-
-
+**📣 <u>ナレーション</u>**
+このデモでは、私はアプリケーションSRE（サイト・リライアビリティ・エンジニア）として、自社が運営するRobotShopというEコマースサイトの責任者をしています。
+日中（顧客の購入が多い時間帯）、私の携帯にSlackのメッセージが届き、サイトに何らかの問題が発生していることを知らせてきました。
+RobotShopのサイトで何が起こっているのか検証してみましょう。
+アプリケーションは起動しているが、レビューを取得できないというエラーが表示される。
 
 <div style="page-break-after: always;"></div>
 
-### 2.3.2 Show ratings not working
-
-
+### 2.3.2 レーティングが機能していないことの確認
 
 ![image](./demo/image.088.png)
 
+>**🚀 <u>アクション</u>**
+ロボットの詳細を開くと、レーティングが表示されていないことがわかります。
 
+**📣 <u>ナレーション</u>**
 
->**🚀 <u>Action</u>**
-Open any robot details to show that there are no ratings displayed.
-
-**📣 <u>Narration</u>**
-
-I know that there are many ratings for each of the products that we sell, so when none are displayed, it means that there is a likely problem with `Ratings` service withing application that may heavily impact client’s purchasing decisions, as well as may be a sign of a wider outage.
-
+私たちが販売する各製品には多くの評価があるため、何も表示されない場合は、アプリケーション内の「評価」サービスに問題がある可能性が高く、顧客の購買決定に大きな影響を与える可能性があり、また、より広範囲な障害の兆候である可能性があります。
 
 <div style="page-break-after: always;"></div>
 
-## 2.4 Understanding the incident
+## 2.4 インシデントの理解
 
-### 2.4.1 Login to CP4WAIOps
+### 2.4.1 CP4WAIOpsにログイン
 
 ![image](./demo/image.054.png)
 
->**🚀 <u>Action</u>**
-In the Demo UI, click **CP4WAIOps `(1)`**
-
-
+>**🚀 <u>アクション</u>**
+デモUIで、**CP4WAIOps `(1)`** をクリックします。
 
 ![image](./demo/image.055.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Let’s take a closer look at the incident that has been created in Watson AIOps.
-
-
+Watson AIOpsで作成されたインシデントを詳しく見てみましょう。
 
 <div style="page-break-after: always;"></div>
 
-
-### 2.4.2 Open the Story
+### 2.4.2 ストーリーを開く
 
 ![image](./demo/image.056.png)  
 
->**🚀 <u>Action</u>**
-Click the "hamburger menu" on the upper left. Click **Stories and alerts**
-
-
-
+>**🚀 <u>アクション</u>**
+左上の "ハンバーガーメニュー" をクリックします。**ストーリー＆アラート**をクリックします。
 
 ![image](./demo/image.057.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-We can see that the simulation has created a **Story**. The **Story** includes grouped information related to the incident at hand. It equates to a classic War Room that are usually put in place in case of an outage. 
-The **Story** contains related log anomalies, topology, similar incidents, recommended actions based on past trouble tickets, relevant events, runbooks, and more.
-
+シミュレーションによって**Story**が作成されたことがわかります。ストーリー**には、目下の事故に関連する情報がグループ化されています。これは、通常、障害発生時に設置される古典的なWar Roomに相当するものです。
+Story**には、関連するログの異常、トポロジー、類似のインシデント、過去のトラブルチケットに基づく推奨アクション、関連イベント、ランブックなどが含まれています。
 
 <div style="page-break-after: always;"></div>
 
-### 2.4.3 Examining the Story
+### 2.4.3 ストーリーを確認
 
 ![image](./demo/image.056.png)  
 
->**🚀 <u>Action</u>**
-Click the "hamburger menu" on the upper left. Click **Stories and alerts** 
-
-
-
+>**🚀 <u>アクション</u>**
+左上の "ハンバーガーメニュー"をクリックします。**ストーリー＆アラート**をクリックします。
 
 ![image](./demo/image.057.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Now let's have a look at the **Story**.
-
+それでは、**ストーリー**をご覧ください。
 
 ![image](./demo/image.059.png)
 
-As I said before, the Story regroups all relevant information concerning the incident at hand that have been identified by Watson AIOps.
+前述したように、「ストーリー」は、Watson AIOpsによって特定された、目下の事件に関するすべての関連情報を再集約する。
 
-1. A list of Alerts that have been identified by Watson AIOps to be the most probable cause
-2. The localization of the problem related to the Topology
-3. The suggested Runbooks to automatically mitigate the incident
-4. Similar Incidents that resemble the incident at hand
-5. Status of the Story - here I can change the status and priority of the story
+1. Watson AIOpsが最も可能性の高い原因として特定したアラートのリスト。
+2. トポロジーに関連する問題の局所化
+3. インシデントを自動的に軽減するための提案されたランブック
+4. 現在発生しているインシデントに類似したインシデント
+5. ストーリーのステータス - ここでストーリーのステータスと優先度を変更することができます。
 
 <div style="page-break-after: always;"></div>
 
-### 2.4.4 Acknowledge the Story
+### 2.4.4 ストーリーを認識する
 
 >**🚀 <u>Action</u>**
->Click on **Change Story Settings.**
->
->Select **Change Status.**
->
->Click on  **In progress**
-
+>**ストーリー設定変更.**をクリックする。
+>**Change Status**を選択します。
+>**進行中**をクリックします。
 
 ![image](./demo/image.079.png)  
 
+**📣 <u>ナレーション</u>**
 
-
-**📣 <u>Narration</u>**
-
-First and before I continue examining the Story I want to let my colleagues know that I'm working on the incident. So let me set it to In Progress.
+まず、「ストーリー」の検証を続ける前に、私がこの事件に取り組んでいることを同僚に知らせたいと思います。そこで、「進行中」に設定しておきます。
 
 <div style="page-break-after: always;"></div>
 
-### 2.4.5 Similar Incidents
+### 2.4.5 類似のインシデント
 
 >**🚀 <u>Action</u>**
-Click the first similar resolution ticket  
-
+最初の類似解像度チケットをクリック 
 
 ![image](./demo/image.060.png)  
 
+**📣 <u>ナレーション</u>**
 
+ほとんどの大企業は、ITサービス管理ツールを使用して、IT周辺のプロセスを管理しています。私たちの組織では、その目的でServiceNowを使用しています。過去のインシデントと解決情報は、Watson AIOpsによって取り込まれ、分析されます。
 
-**📣 <u>Narration</u>**
+IBM Cloud Pak for Watson AIOpsは、既存のチケットに対してトレーニングを行い、過去のインシデントの解決に使われた手順（文書化されている場合）を抽出し、自然言語処理を使って解決方法を推奨します。このAIモデルは、現在の問題の修復を支援するために、過去のインシデントを発見するのに役立ちます。
 
-Most large organizations use IT Service Management tools to govern processes around IT. Our organization is using ServiceNow for that purpose. Past incidents with resolution information are ingested and analysed by Watson AIOps.
+つまり、**ストーリー**について、あなたのチームには過去の類似インシデントの上位ランクが提示されるのです。これらの関連する類似インシデントは、IがServiceNowにアクセスできない場合でも、インシデント解決のスピードアップに貢献します。このような機能がない場合、チームは過去のインシデントと解決策を手動で検索する必要があり、これは時間のかかる作業です。
 
-The IBM Cloud Pak for Watson AIOps trains on exisitng tickets and it extracts the steps used to fix previous incidents (if documented) and recommend resolutions using natural language processing. This AI model helps you discover historical incidents to aid in the remediation of current problems. 
+この例では、問題はリソース制限を大幅に削減する GIT コミットが mysql デプロイメントで DEV によってコミットされたことに関連していることがわかります。
 
-So for the **Story**, your team is presented with the top-ranked similar incidents from the past. These relevant similar incidents help speed up incident resolution even if the I don't have access to ServiceNow. Without these features, your team must manually search for past incidents and resolutions, which is time-consuming.
+この問題に対して、どのように解決されたかを確認してみましょう。
 
-In this particular example I can see that the problem was related to a GIT Commit that massivly reduced the resource limits has been commited by DEV on the mysql Deployment.
-
-Let me check how the problem was resolved for this incident.
-
-**❗ <u>Note</u>**:  In the Robot Shop demo scenario, the integration with ServiceNow is simulated with the static content. 
+**❗ <u>メモ</u>**:  ロボットショップのデモシナリオでは、ServiceNowとの連携を静的コンテンツでシミュレートしています。 
 
 <div style="page-break-after: always;"></div>
 
-#### Resolution Information
+#### 解決情報
 
-
-
->**🚀 <u>Action</u>**
->Click on the **Resolution Information** Tab
-
+>**🚀 <u>アクション</u>**
+>**Resolution Information** タブをクリックします。
 
 ![image](./demo/image.076.png)  
 
+**📣 <u>ナレーション</u>**
 
+mysqlのデプロイメントを変更することで解決し、問題を軽減するためのRunbookが作成されていたようです。
 
-**📣 <u>Narration</u>**
-
-It seems that it was resolved by changing the mysql deployment and a Runbook had been created to mitigate the problem.
-
-To finish up, I will check if the incident was related to an official change.
-
-
+仕上げに、今回の事件が公式な変更に関連したものであるかどうかを確認します。
 
 <div style="page-break-after: always;"></div>
 
-#### Examine the Change
-
-
+#### 変更を確認する
 
 ![image](./demo/image.077.png)
 
->**🚀 <u>Action</u>**
->Click on the **Related Records** Tab
->
->Click on the **i** Button next to **Caused by Change**
+>**🚀 <u>アクション</u>**
+>**Related Records** タブをクリックします。
+>**i** ボタンをクリックし、**Caused by Change**をクリックします。
 
 ![image](./demo/image.078.png)  
 
+<div style="page-break-after: always;"></div>
 
+**📣 <u>ナレーション</u>**
+
+この問題は、mysqlデータベースのフットプリントを削減することを目的とした変更に関連していることがわかりました。
+
+まだ進行中なので、開発チームが同様の問題を再現した可能性が高いです。
+
+もちろん、現実にはランブックを起動して、問題が解決されるかどうかを確認します。
+しかし、デモのために、まずもう少し深く掘り下げてみましょう。
 
 <div style="page-break-after: always;"></div>
 
-**📣 <u>Narration</u>**
+### 2.4.6 アラートの確認
 
-Ok, so now I can see that the problem is related to a Change that aims to reduce the footprint of the mysql database.
+>**🚀 <u>アクション</u>**
 
-As it's still ongoing, chances are high, that the development team recreated a similar problem.
-
-Obviously, in real life I would now start the Runbook to see if it resolves the problem.
-But for the sake of the demo, let's dig a little deeper first.
-
-
-
-<div style="page-break-after: always;"></div>
-
-### 2.4.6 Examine the Alerts
-
->**🚀 <u>Action</u>**
-Close the ServiceNow page and click the **Alerts** Tab. 
+ServiceNowのページを閉じて、**Alerts** タブをクリックします。
 
 ![image](./demo/image.061.png)  
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Notice, that alerts are not sorted by severity, but the AI engine ranked them by relevance. The ones that are likely related to the root cause are at the top. Let’s look at the first row for some more details. 
+アラートは重要度順に並んでいるのではなく、AIエンジンが関連性でランク付けしていることに注目してください。根本原因に関連する可能性が高いものが上位に表示されています。1行目を見て、もう少し詳しく見てみましょう。
 
->**🚀 <u>Action</u>**
-Click on the first Alert in the list. 
+>**🚀 <u>アクション</u>**
 
-**📣 <u>Narration</u>**
+リストの最初のAlertをクリックします。
 
-In the **Alert details,** you can see different types of groupings explaining why the specific alert was added to the story.
+**📣 <u>ナレーション</u>**
+
+**アラートの詳細**では、特定のアラートがストーリーに追加された理由を説明するさまざまな種類のグループ分けを見ることができます。
 
 <div style="page-break-after: always;"></div>
 
-#### Scope based grouping
+#### スコープに基づくグループ化
 
->**🚀 <u>Action</u>**
-Click **Scope-based grouping**. 
-
+>**🚀 <u>アクション</u>**
+**Scope-based grouping**をクリックします。
 
 ![image](./demo/image.027.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Some alerts were added to the story because they occurred on the same resource within a short period (default is 15 minutes)
+短時間（デフォルトは15分）に同じリソースで発生したため、ストーリーに追加されたアラートもあります
 
-#### Topological grouping
+#### トポロジカル・グループ化
 
->**🚀 <u>Action</u>**
-Click **Topological grouping**. 
-
+>**🚀 <u>アクション</u>**
+**Topological grouping**をクリックします。
 
 ![image](./demo/image.028.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Other alerts were grouped because they occurred on the logically or physically related resources. This correlation is using the application topology service that stitches topology information from different sources.
+他のアラートは、論理的または物理的に関連するリソースで発生したため、グループ化されました。この相関は、異なるソースからのトポロジー情報をつなぎ合わせるアプリケーション トポロジー サービスを使用しています。
 
 <div style="page-break-after: always;"></div>
 
-#### Temporal grouping
+#### 時間的なグループ分け
 
 >**🚀 <u>Action</u>**
-Click **Temporal correlation**. 
-
+**Temporal correlation** をクリックします。
 
 ![image](./demo/image.029.png)
 
+**📣 <u>ナレーション</u>**
 
-**📣 <u>Narration</u>**
+最後に、時間的相関は、以前、歴史上、短い時間枠の中で互いに接近して起こることが知られているイベントをストーリーに加えます。ここで最も重要なのは、これらの相関関係がすべて自動的に起こるという事実です。高度にダイナミックで分散したクラウドネイティブアプリケーションでは、これは多くの時間と労力を節約する大きな利点となります。
 
-Finally, the temporal correlation adds to the story events that previously, in history, are known to occur close to each other in the short time window. What is most important here is the fact that all these correlations happen automatically – there is no need to define any rules or program anything. In highly dynamic and distributed cloud-native applications this is a huge advantage that saves a lot of time and effort.
-
-
->**🚀 <u>Action</u>**
-**Close** the Alert details window. 
+>**🚀 <u>アクション</u>**
+アラートの詳細ウィンドウを閉じます。
 
 <div style="page-break-after: always;"></div>
 
-### 2.4.7 Incident timeline
+### 2.4.7 インシデントのタイムライン
 
 >**🚀 <u>Action</u>**
->Click twice on the  **Last occurence** Header. 
->
->***Result**: The "Commit in repository robot-shop by Niklaus Hirt on file robot-shop.yaml" should be at the bottom* 
+>**Last occurence** ヘッダーをダブルクリックします。
+>***結果**です： "リポジトリrobot-shopでのコミット by Niklaus Hirt on file robot-shop.yaml "は一番下にあるはずです*。
 
 ![image](./demo/image.063.png)  
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-When trying to understand what happened during the incident, I sort the Alerts by occurence. This allows you to understand the chain of events.
+インシデント時に何が起こったかを理解しようとするとき、私はアラートを発生順に並べ替えます。これにより、イベントの連鎖を理解することができます。
 
-* I can see that the first event was a code change that had been commited to **GitHub**. When I hover over the description I get the full text.
-So it seems that the Development Team has reduced the available memory for the mysql database.
+* 最初のイベントは、**GitHub** にコミットされたコード変更であることがわかります。説明文にカーソルを合わせると、全文が表示されます。
+つまり、開発チームがmysqlデータベースの利用可能なメモリーを減らしたようです。
 
-Other events are confirming the hypothesis. 
-* I can then see the CI/CD process kick in and deploys the code change to the system detected by the Security tool and 
-* **Instana** has has detected the memory size change. 
+他の出来事もこの仮説を裏付けています。
+* CI/CD プロセスが起動し、セキュリティツールによって検出されたシステムにコード変更をデプロイするのを見ることができます。
+* Instana**はメモリサイズの変更を検出しました。
 
 
-* Then **Functional Selenium Tests** start failing and 
-* **Turbonomic** tries to scale-up the mysql database.
-* **Instana** tells me that the mysql Pod is not running anymore, the replicas are not matching the desired state.
+そして、**Functional Selenium Tests** が失敗し始め、**Turbonomic** がメモリサイズの変更を検出します。
+**Turbonomic** は mysql データベースをスケールアップしようとします。
+* Instana**は、mysqlポッドがもう実行されておらず、レプリカが望ましい状態にマッチしていないことを教えてくれました。
 
 <div style="page-break-after: always;"></div>
 
-* Cloud Pak for Watson AIOps has learned the normal, good patterns for logs coming from the applications. The Story contains a **Log Anomaly** that has been detected in the ratings service that cannot acces the mysql database.
-
+* Watson AIOps の Cloud Pak は、アプリケーションから来るログの正常で良いパターンを学びました。このストーリーには、mysql データベースにアクセスできないレーティング・サービスで検出された **Log Anomaly** が含まれています。
+* 
 ![image](./demo/image.064.png)
 
->**🚀 <u>Action</u>**
-Click on a Alert line that has **ANOMALY:** in the Type column. Then open the **Metric Anomaly Details** accordion. 
+>**🚀 <u>アクション</u>**
+タイプ欄に**ANOMALY:**とあるアラート行をクリックします。次に、**Metric Anomaly Details** アコーディオンを開きます。
 
+**📣 <u>ナレーション</u>**
 
-**📣 <u>Narration</u>**
-
-* Cloud Pak for Watson AIOps is also capable of collecting metrics from multiple sources and detecting **Metric Anomalies**. It was trained on hundreds or thousands of metrics from the environment and constructs a dynamic baseline (shown in green). The graphic suddenly turns red which relates to detected anomaly when the database is consuming a higher amount of memory than usual.
-
+* Cloud Pak for Watson AIOpsは、複数のソースからメトリクスを収集し、**Metric Anomalies**を検出することも可能です。環境からの数百または数千のメトリクスでトレーニングされ、動的なベースラインを構築します（緑で表示）。グラフィックが突然赤くなるのは、データベースが通常よりも大量のメモリを消費しているときに検出された異常に関連しています。
 
 ![image](./demo/image.065.png)
 
->**🚀 <u>Action</u>**
-(1) In **Related Alerts** select some additional alerts.
+>**🚀 <u>アクション</u>**
+(1) **関連アラート**で、いくつかの追加アラートを選択します。
 
+**📣 <u>ナレーション</u>**
 
-**📣 <u>Narration</u>**
-
-You can display several alerts at the same time to better understand the temporal dependencies
+複数のアラートを同時に表示することで、時間的な依存関係をより理解することができます
 
 <div style="page-break-after: always;"></div>
 
->**🚀 <u>Action</u>**
-(2) Select a portion of the graph with your mouse to zoom in
+>**🚀 <u>アクション</u>**
+(2) マウスでグラフの一部を選択して拡大する
 
+**📣 <u>ナレーション</u>**
 
-**📣 <u>Narration</u>**
-
-Now let's zoom in to better see the anomalies
+では、拡大して異常がよくわかるようにしましょう。
 
 ![image](./demo/image.066.png)
 
+>**🚀 <u>アクション</u>**
+データポイントにカーソルを合わせると、ビフォーアフターが表示されます。
+
+**📣 <u>ナレーション</u>**
+
+この事件によって**Latencies**が急上昇し、**Transactions per Seconds**がほとんどゼロになっていることがよくわかります。これでまた、問題の原因を確認することができました。
+
 >**🚀 <u>Action</u>**
-Hover over a datapoint to show the before/after values. 
-
-
-**📣 <u>Narration</u>**
-
-I can clearly see that the incident caused the **Latencies** to skyrocket and the **Transactions per Seconds** are almost zero. This is yet another confirmation of the source of the problem.
-
->**🚀 <u>Action</u>**
-Close the Metric anomaly details view. 
+Metric anomaly 詳細ビューを閉じる。
 
 <div style="page-break-after: always;"></div>
 
-## 2.5 Working with Topology
+## 2.5 トポロジーの操作
+
+### 2.5.1 トポロジーを検証する
 
 
-
-### 2.5.1 Examining the Topology
-
-
->**🚀 <u>Action</u>**
->Click the **Topology** Tab. 
-
-
+>**🚀 <u>アクション</u>**
+>**Topology** タブをクリックします。
 
 ![image](./demo/image.067.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-The interface shows the **topology** of the application that is relevant to the incident. IBM Cloud Pak for Watson AIOps’ topology service delivers a working understanding of the resources that you have in your environment, how the resources relate to each other, and how the environment has changed over time.
+このインターフェースは、インシデントに関連するアプリケーションの **トポロジー** を表示します。IBM Cloud Pak for Watson AIOps のトポロジー・サービスは、環境にあるリソース、リソースが互いにどのように関連しているか、そして環境が時間の経過とともにどのように変化してきたかについての作業理解を提供します。
 
-You can see that there are some statuses attached to the different resources, marked with colorful dots. Let’s view the details and status of the **mysql** resource with red status. 
+カラフルなドットで示されたさまざまなリソースに、いくつかのステータスが付加されていることがわかります。ここでは、赤いステータスの **mysql** リソースの詳細とステータスを表示してみましょう。
 
 <div style="page-break-after: always;"></div>
 
 ![image](./demo/image.068.png)  
 
->**🚀 <u>Action</u>**
->Find the resource which displays resource name “**mysql**”. Then, right-click and select **Resource details.** 
->
+>**🚀 <u>アクション</u>**
+>リソース名 "**mysql**"が表示されているリソースを探します。次に、右クリックして、**リソースの詳細.**を選択します。
 
 >**🚀 <u>Action</u>**
->Click on Tab **Alerts** 
-
+>**Alerts** タブをクリックします。
 
 ![image](./demo/image.069.png)
 
-**📣 <u>Narration</u>** 
+**📣 <u>ナレーション</u>** 
 
-The topology service provides operations teams with complete up-to-date visibility over dynamic infrastructure, resources, and services. The topology service lets you query a specific resource for details, and other relevant information. Here I can see all Alerts for the mysql database resource for example.
+トポロジーサービスは、運用チームに動的なインフラ、リソース、およびサービスに関する完全な最新の可視性を提供します。トポロジーサービスでは、特定のリソースに対して詳細やその他の関連情報を照会することができます。ここでは、たとえば mysql データベースリソースのすべてのアラートを見ることができます。
 
 <div style="page-break-after: always;"></div>
 
 
-### 2.5.2 [Optional] Topology in-depth
+### 2.5.2 [オプション] トポロジーの深堀り
 
 ![image](./demo/image.070.png)
 
->**🚀 <u>Action</u>**
->Find the resource which displays resource name “mysql”. Then, right-click and select **Open in Topology Viewer.** 
-
-
+>**🚀 <u>アクション</u>**
+>リソース名 "mysql "が表示されているリソースを探します。右クリックし、**Open in Topology Viewer.**を選択します。
 
 ![image](./demo/image.071.png)
 
+**📣 <u>ナレーション</u>**
 
-
-**📣 <u>Narration</u>**
-
-The interface shows the topology surrounding the mysql resource. I can see that the **mysql** deployment is being called by the **ratings** service and that it runs on a certain worker node. 
-
-
-
-
+インターフェースには、mysqlリソースを取り巻くトポロジーが表示されます。mysql**デプロイが**ratings**サービスによって呼び出され、特定のワーカーノードで実行されていることがわかります。
 
 ![image](./demo/image.072.png)
 
->**🚀 <u>Action</u>**
->Change the number of hops to `4` and click **Render**.
+>**🚀 <u>アクション</u>**
+>ホップ数を `4` に変更し、**Render**をクリックします。
 
 
 
 **📣 <u>Narration</u>**
 
- I can also increase the size of the graph, still based on the **mysql** deployment.
-
-
+また、グラフのサイズを大きくすることもできますが、やはり**mysql**のデプロイメントがベースになっています。
 
 ![image](./demo/image.073.png)
 
->**🚀 <u>Action</u>**
->Right-click om mysql and select **Show last change in timeline** and check **Delta**
-
-
+>**🚀 <u>アクション</u>**
+>mysqlを右クリックし、**Show last change in timeline**を選択し、**Delta**をチェックします。
 
 ![image](./demo/image.074.png)
 
+**📣 <u>ナレーション</u>**
 
-
-**📣 <u>Narration</u>**
-
- Now I will examine the historical events for the **mysql** component. I can see the **Alerts** that have been raised on the **mysql** resource over time.
-
-
-
-
+ここで、**mysql**コンポーネントの履歴イベントを調べてみます。mysql**リソースで発生した**アラート**を時系列で確認することができます。
 
 <div style="page-break-after: always;"></div>
 
+## 2.6 インシデントを解決する
 
-
-## 2.6 Resolving the incident
-
-
-
-### 2.6.1 Fixing the problem with runbook automation
->**🚀 <u>Action</u>**
->
->Click on the  **Overview**  Tab.
-
+### 2.6.1 runbookの自動化の問題を解決する
+>**🚀 <u>アクション</u>**
+>**Overview** タブをクリックします。
 
 ![image](./demo/image.080.png)
 
+**📣 <u>ナレーション</u>**
 
-
-**📣 <u>Narration</u>**
-
-Now that we know what the problem is, let’s correct what has happened. A runbook has been automatically identified but have not been executed. Runbooks are guided steps that IT operations teams use to troubleshoot and resolve problems. Some organizations might call these standard operating procedures or playbooks. When an incident occurs, IBM Cloud Pak for Watson AIOps matches an appropriate runbook to the problem. The runbook can be set to run automatically when it is matched to an incident, or it can run with user approval and participation. 
+さて、問題の原因がわかったところで、起きてしまったことを修正しましょう。ランブックが自動的に特定されましたが、実行されていません。ランブックは、IT運用チームがトラブルシューティングや問題解決に使用するガイド付きステップです。組織によっては、これを標準作業手順書やプレイブックと呼ぶ場合もあります。インシデントが発生すると、IBM Cloud Pak for Watson AIOps は、適切なランブックを問題にマッチさせます。ランブックは、インシデントにマッチしたときに自動的に実行されるように設定することも、ユーザーの承認と参加を得て実行することも可能です。
 
 <div style="page-break-after: always;"></div>
 
-Let’s execute the Runbook.
+Runbookを実行してみましょう。
 
->**🚀 <u>Action</u>**
->
->Click on the three dots and click **Run**
->
->Click **Start Runbook**.
-
+>**🚀 <u>アクション</u>**
+>3つの点をクリックし、**実行**をクリックします。
+>**Start Runbook**をクリックします。
 
 ![image](./demo/image.082.png)
 
->**🚀 <u>Action</u>**
->
->Click **Run** in Step 1.
+>**🚀 <u>アクション</u>**
+>ステップ1の**Run**をクリックします。
 
 ![image](./demo/image.083.png)
 
-
-
-**❗ <u>Note</u>**: The execution of the runbook can take few minutes. 
+**❗ <u>メモ</u>**: Runbookの実行には数分かかることがあります。
 
 <div style="page-break-after: always;"></div>
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-The Runbook that I just started kicks off a Playbook on Ansible Tower. I can follow the execution as it connects to the cluster and then scales up memory for the MySQL deployment.
-
-
+先ほど開始したRunbookは、Ansible Tower上のPlaybookをキックオフします。クラスタに接続し、MySQLの展開のためにメモリをスケールアップする実行を追うことができます。
 
 ![image](./demo/image.084.png)
 
-
-
->**🚀 <u>Action</u>**
->
->When finished, click **Complete**.
->
->Open the RobotShop application. Verify that ratings are correctly shown 
-
-
+>**🚀 <u>アクション</u>**
+>完了したら、**Complete**をクリックします。
+>RobotShopアプリケーションを開いてください。レーティングが正しく表示されていることを確認する 
 
 ![image](./demo/image.087.png)
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Before confirming that the runbook worked as expected, I should check the RobotShop application to see if it is working as expected.
-
-
+ランブックが期待通りに動いたかどうかを確認する前に、RobotShopのアプリケーションが期待通りに動いているかどうかを確認する必要がありますね。
 
 ![image](./demo/image.085.png)
 
->**🚀 <u>Action</u>**
->
->Rate the Runbook
->
->Then click **Runbook Worked**.
+>**🚀 <u>アクション</u>**
+>ランブックを評価する
+>その後、**Runbook Worked**をクリックします。
 
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-So the runbook has resolved the problem. When I tell Watson AIOps that the Runbook worked, it will learn over time to prioritize and suggest more relevant Runbooks.
+つまり、ランブックが問題を解決したのです。Watson AIOpsにランブックが機能したことを伝えると、時間をかけて学習し、より適切なランブックの優先順位付けや提案をするようになります。
 
 <div style="page-break-after: always;"></div>
 
-### 2.6.2 Resolve the Incident
+### 2.6.2 インシデントを解決する
 
->**🚀 <u>Action</u>**
->Click on **Change Story Settings.**
->
->Select **Change Status.**
->
->Click on  **Resolved**
-
+>**🚀 <u>アクション</u>**
+>**ストーリーの設定を変更**をクリックします。
+>**ステータスの変更**を選択します。
+>**解決済み**をクリックします。
 
 ![image](./demo/image.079.png)  
 
+**📣 <u>ナレーション</u>**
 
-
-**📣 <u>Narration</u>**
-
-So now as we have resolved the problem,  I will inform the development team of the problem by reopening the ServiceNow ticket and by closing the Story. 
-
-
-
-
-
-
+これで問題が解決したので、ServiceNowのチケットを再開し、Storyを閉じることで、開発チームに問題を知らせます。
 
 # Demonstration summary
-**📣 <u>Narration</u>**
+**📣 <u>ナレーション</u>**
 
-Today, I have shown you how Cloud Pak for Watson AIOps can assist the SRE/Operations team to identify, verify, and ultimately correct an issue with a modern, distributed application running in a cloud-native environment. The presented solution provides automatic application topology discovery, anomaly detection both with metrics and logs, and sophisticated methods of correlation of events coming from different sources. 
-
-
-
+今日は、Cloud Pak for Watson AIOps が、SRE/運用チームがクラウドネイティブ環境で動作する最新の分散アプリケーションの問題を特定、検証し、最終的に修正するのを支援する方法を紹介しました。このソリューションでは、アプリケーションのトポロジーの自動検出、メトリクスとログの両方による異常検出、異なるソースからのイベントの高度な相関方法を提供します。
