@@ -160,7 +160,7 @@ WAIOpsはElasticSearchからもLogを取り込みます（これはSplunkや他�
 
 **Slide 5**</br>
 WAIOpsはInstana（Dynatrace、NewRelicなど）からMetricを取り込みます。</br>
-Metric Anomaly detectionは、十分に稼働しているシステムでトレーニングされ、ダイナミックベースラインを作成します。</br>
+Metric Anomaly detectionは、十分に稼働しているシステムでトレーニングされ、動的な閾値を作成します。</br>
 さまざまなアルゴリズムにより、異常や異常値を検出することができます。異常が検出された場合、他のイベントと一緒にグループ化されます。
 
 **Slide 6**</br>
